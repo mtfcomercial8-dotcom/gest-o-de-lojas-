@@ -74,7 +74,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ onAdd, onClose
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Valor (R$)</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Valor (Kz)</label>
               <input
                 type="number"
                 required

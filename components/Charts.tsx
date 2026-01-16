@@ -27,11 +27,11 @@ export const IncomeExpenseChart: React.FC<{ data: MonthlyDataPoint[] }> = ({ dat
             </linearGradient>
           </defs>
           <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-          <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `R$${val}`} />
+          <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `Kz ${val}`} />
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
           <Tooltip 
             contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-            formatter={(value: number) => [`R$ ${value}`, '']}
+            formatter={(value: number) => [`Kz ${value}`, '']}
           />
           <Area type="monotone" dataKey="income" name="Receita" stroke="#10b981" fillOpacity={1} fill="url(#colorIncome)" />
           <Area type="monotone" dataKey="expense" name="Despesa" stroke="#ef4444" fillOpacity={1} fill="url(#colorExpense)" />
@@ -59,7 +59,7 @@ export const CategoryPieChart: React.FC<{ data: ChartDataPoint[] }> = ({ data })
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(val: number) => `R$ ${val}`} />
+          <Tooltip formatter={(val: number) => `Kz ${val}`} />
           <Legend iconType="circle" fontSize={12} />
         </PieChart>
       </ResponsiveContainer>

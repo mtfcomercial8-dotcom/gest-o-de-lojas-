@@ -21,15 +21,15 @@ export const generateFinancialInsights = async (transactions: Transaction[]): Pr
     const recentTransactions = transactions
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 10)
-      .map(t => `${t.date}: ${t.title} (${t.type}) - R$ ${t.amount}`);
+      .map(t => `${t.date}: ${t.title} (${t.type}) - Kz ${t.amount}`);
 
     const prompt = `
-      Atue como um consultor financeiro especialista. Analise os seguintes dados financeiros de um usuário pessoal:
+      Atue como um consultor financeiro especialista. Analise os seguintes dados financeiros de um usuário pessoal em Angola:
       
       Resumo:
-      - Total Receitas: R$ ${summary.income.toFixed(2)}
-      - Total Despesas: R$ ${summary.expense.toFixed(2)}
-      - Saldo: R$ ${(summary.income - summary.expense).toFixed(2)}
+      - Total Receitas: Kz ${summary.income.toFixed(2)}
+      - Total Despesas: Kz ${summary.expense.toFixed(2)}
+      - Saldo: Kz ${(summary.income - summary.expense).toFixed(2)}
       
       Gastos por Categoria:
       ${JSON.stringify(summary.categories, null, 2)}
@@ -42,7 +42,7 @@ export const generateFinancialInsights = async (transactions: Transaction[]): Pr
       2. Três dicas práticas e acionáveis para economizar ou investir melhor, baseadas especificamente nestes gastos.
       3. Identifique se há algum padrão de gasto preocupante.
 
-      Mantenha o tom profissional, encorajador e direto. Use formatação Markdown (negrito, listas). Responda em Português do Brasil.
+      Mantenha o tom profissional, encorajador e direto. Use formatação Markdown (negrito, listas). Considere o contexto econômico se relevante, mas foque nos hábitos.
     `;
 
     const response = await ai.models.generateContent({

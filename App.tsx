@@ -9,16 +9,16 @@ import { generateFinancialInsights } from './services/geminiService';
 
 // Mock Data
 const INITIAL_TRANSACTIONS: Transaction[] = [
-  { id: '1', title: 'Salário Mensal', amount: 5000, type: 'income', category: 'Salário', date: '2023-10-05' },
-  { id: '2', title: 'Aluguel', amount: 1800, type: 'expense', category: 'Moradia', date: '2023-10-10' },
-  { id: '3', title: 'Supermercado Semanal', amount: 450.50, type: 'expense', category: 'Alimentação', date: '2023-10-12' },
-  { id: '4', title: 'Freelance Design', amount: 1200, type: 'income', category: 'Freelance', date: '2023-10-15' },
-  { id: '5', title: 'Uber', amount: 45.90, type: 'expense', category: 'Transporte', date: '2023-10-16' },
-  { id: '6', title: 'Cinema e Jantar', amount: 180, type: 'expense', category: 'Lazer', date: '2023-10-18' },
-  { id: '7', title: 'Farmácia', amount: 89.90, type: 'expense', category: 'Saúde', date: '2023-10-20' },
-  { id: '8', title: 'Salário Mensal', amount: 5000, type: 'income', category: 'Salário', date: '2023-11-05' },
-  { id: '9', title: 'Aluguel', amount: 1800, type: 'expense', category: 'Moradia', date: '2023-11-10' },
-  { id: '10', title: 'Supermercado', amount: 620, type: 'expense', category: 'Alimentação', date: '2023-11-12' },
+  { id: '1', title: 'Salário Mensal', amount: 500000, type: 'income', category: 'Salário', date: '2023-10-05' },
+  { id: '2', title: 'Aluguel', amount: 180000, type: 'expense', category: 'Moradia', date: '2023-10-10' },
+  { id: '3', title: 'Supermercado Semanal', amount: 45000, type: 'expense', category: 'Alimentação', date: '2023-10-12' },
+  { id: '4', title: 'Freelance Design', amount: 120000, type: 'income', category: 'Freelance', date: '2023-10-15' },
+  { id: '5', title: 'Táxi', amount: 4500, type: 'expense', category: 'Transporte', date: '2023-10-16' },
+  { id: '6', title: 'Cinema e Jantar', amount: 18000, type: 'expense', category: 'Lazer', date: '2023-10-18' },
+  { id: '7', title: 'Farmácia', amount: 8900, type: 'expense', category: 'Saúde', date: '2023-10-20' },
+  { id: '8', title: 'Salário Mensal', amount: 500000, type: 'income', category: 'Salário', date: '2023-11-05' },
+  { id: '9', title: 'Aluguel', amount: 180000, type: 'expense', category: 'Moradia', date: '2023-11-10' },
+  { id: '10', title: 'Supermercado', amount: 62000, type: 'expense', category: 'Alimentação', date: '2023-11-12' },
 ];
 
 function App() {
@@ -216,7 +216,7 @@ function App() {
                             </div>
                           </div>
                           <span className={`font-semibold text-sm ${tx.type === 'income' ? 'text-emerald-600' : 'text-slate-700'}`}>
-                            {tx.type === 'income' ? '+' : '-'} R$ {tx.amount.toFixed(2)}
+                            {tx.type === 'income' ? '+' : '-'} Kz {tx.amount.toFixed(2)}
                           </span>
                         </div>
                       ))}
@@ -252,7 +252,7 @@ function App() {
                             </span>
                           </td>
                           <td className={`p-4 text-sm font-bold text-right ${tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                            {tx.type === 'income' ? '+' : '-'} R$ {tx.amount.toFixed(2)}
+                            {tx.type === 'income' ? '+' : '-'} Kz {tx.amount.toFixed(2)}
                           </td>
                         </tr>
                       ))}

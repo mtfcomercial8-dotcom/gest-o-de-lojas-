@@ -9,9 +9,9 @@ interface StatCardProps {
 
 export const StatCard: React.FC<StatCardProps> = ({ title, value, type }) => {
   const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('pt-BR', {
+    return new Intl.NumberFormat('pt-AO', {
       style: 'currency',
-      currency: 'BRL',
+      currency: 'AOA',
     }).format(val);
   };
 
