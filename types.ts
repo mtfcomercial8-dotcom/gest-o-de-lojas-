@@ -10,6 +10,13 @@ export interface Transaction {
   date: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  image?: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -20,6 +27,17 @@ export interface Product {
   discount: number; // Porcentagem ou valor fixo
   tax: number; // Taxa (%)
   duty: number; // Imposto (%)
+  image?: string;
+  categoryId?: string;
+}
+
+export interface Supplier {
+  id: string;
+  name: string;
+  productSupplied: string;
+  totalValue: number; // Valor Total do Pedido/Contrato
+  amountPaid: number; // Valor Já Pago
+  status: 'paid' | 'debt'; // Status calculado
 }
 
 export interface ChartDataPoint {

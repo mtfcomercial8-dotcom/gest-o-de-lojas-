@@ -1,11 +1,16 @@
 import React, { useState, useMemo } from 'react';
-import { LayoutDashboard, List, PieChart as PieIcon, Plus, Menu, Package, PackagePlus } from 'lucide-react';
-import { Transaction, MonthlyDataPoint, ChartDataPoint, Product } from './types';
+import { LayoutDashboard, List, PieChart as PieIcon, Plus, Menu, Package, PackagePlus, Layers, Truck, ShoppingCart } from 'lucide-react';
+import { Transaction, MonthlyDataPoint, ChartDataPoint, Product, Category, Supplier } from './types';
 import { StatCard } from './components/StatCard';
 import { IncomeExpenseChart, CategoryPieChart } from './components/Charts';
 import { TransactionForm } from './components/TransactionForm';
 import { ProductForm } from './components/ProductForm';
+import { CategoryForm } from './components/CategoryForm';
+import { SupplierForm } from './components/SupplierForm';
 import { Warehouse } from './components/Warehouse';
+import { Categories } from './components/Categories';
+import { Suppliers } from './components/Suppliers';
+import { Sales } from './components/Sales';
 
 // Mock Data
 const INITIAL_TRANSACTIONS: Transaction[] = [
@@ -26,11 +31,23 @@ const INITIAL_PRODUCTS: Product[] = [
   { id: '2', name: 'Óleo Vegetal', unit: 'Caixa 12x1L', quantity: 30, purchasePrice: 18000, sellingPrice: 24000, discount: 5, tax: 14, duty: 0 },
 ];
 
+const INITIAL_CATEGORIES: Category[] = [
+  { id: 'cat1', name: 'Alimentos Básicos', description: 'Produtos essenciais para consumo diário.' },
+];
+
+const INITIAL_SUPPLIERS: Supplier[] = [
+  { id: 'sup1', name: 'Distribuidora Central', productSupplied: 'Grãos e Cereais', totalValue: 450000, amountPaid: 450000, status: 'paid' },
+  { id: 'sup2', name: 'Importadora Luanda', productSupplied: 'Bebidas Importadas', totalValue: 170000, amountPaid: 50000, status: 'debt' },
+];
+
 function App() {
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [categories, setCategories] = useState<Category[]>(INITIAL_CATEGORIES);
+  const [suppliers, setSuppliers] = useState<Supplier[]>(INITIAL_SUPPLIERS);
+  
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'warehouse'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'warehouse' | 'sales' | 'categories' | 'suppliers'>('dashboard');
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -95,13 +112,121 @@ function App() {
     setProducts(prev => [product, ...prev]);
   };
 
+  const handleDeleteProduct = (id: string) => {
+    if (window.confirm('Tem certeza que deseja apagar este produto?')) {
+      setProducts(prev => prev.filter(p => p.id !== id));
+    }
+  };
+
+  const handleAddCategory = (newCat: Omit<Category, 'id'>, selectedProductIds: string[]) => {
+    const categoryId = Math.random().toString(36).substr(2, 9);
+    const category = {
+      ...newCat,
+      id: categoryId,
+    };
+    
+    setCategories(prev => [category, ...prev]);
+
+    if (selectedProductIds.length > 0) {
+      setProducts(prev => prev.map(p => 
+        selectedProductIds.includes(p.id) ? { ...p, categoryId: categoryId } : p
+      ));
+    }
+  };
+
+  const handleDeleteCategory = (id: string) => {
+    if (window.confirm('Tem certeza que deseja apagar esta categoria?')) {
+      setCategories(prev => prev.filter(c => c.id !== id));
+      setProducts(prev => prev.map(p => 
+        p.categoryId === id ? { ...p, categoryId: undefined } : p
+      ));
+    }
+  };
+
+  const handleAddSupplier = (newSupplier: Omit<Supplier, 'id'>) => {
+    const supplier = {
+      ...newSupplier,
+      id: Math.random().toString(36).substr(2, 9),
+    };
+    setSuppliers(prev => [supplier, ...prev]);
+  };
+
+  const handleDeleteSupplier = (id: string) => {
+    if (window.confirm('Tem certeza que deseja apagar este fornecedor?')) {
+      setSuppliers(prev => prev.filter(s => s.id !== id));
+    }
+  };
+
+  const handleSale = (productId: string, quantity: number) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    if (product.quantity < quantity) {
+      alert("Erro: Quantidade insuficiente em estoque.");
+      return;
+    }
+
+    const totalSaleValue = product.sellingPrice * quantity;
+
+    // 1. Atualizar estoque (Diminuir)
+    setProducts(prev => prev.map(p => 
+      p.id === productId ? { ...p, quantity: p.quantity - quantity } : p
+    ));
+
+    // 2. Adicionar Transação de Receita
+    const newTransaction: Transaction = {
+      id: Math.random().toString(36).substr(2, 9),
+      title: `Venda: ${product.name} (${quantity}x)`,
+      amount: totalSaleValue,
+      type: 'income',
+      category: 'Vendas',
+      date: new Date().toISOString().split('T')[0]
+    };
+
+    setTransactions(prev => [newTransaction, ...prev]);
+    alert("Venda realizada com sucesso!");
+  };
+
   const getPageTitle = () => {
     switch(activeTab) {
       case 'dashboard': return 'Visão Geral';
       case 'transactions': return 'Histórico de Transações';
       case 'warehouse': return 'Gestão de Armazém';
+      case 'sales': return 'Vendas';
+      case 'categories': return 'Categorias de Produtos';
+      case 'suppliers': return 'Gestão de Fornecedores';
       default: return '';
     }
+  };
+
+  const getAddButtonLabel = () => {
+    if (activeTab === 'warehouse') return 'Novo Produto';
+    if (activeTab === 'categories') return 'Nova Categoria';
+    if (activeTab === 'suppliers') return 'Novo Fornecedor';
+    if (activeTab === 'sales') return 'Vender'; // Though sales page is interactive itself
+    return 'Nova Transação';
+  }
+
+  const getAddButtonIcon = () => {
+     if (activeTab === 'warehouse') return <PackagePlus size={18} />;
+     if (activeTab === 'categories') return <Layers size={18} />;
+     if (activeTab === 'suppliers') return <Truck size={18} />;
+     if (activeTab === 'sales') return <ShoppingCart size={18} />;
+     return <Plus size={18} />;
+  }
+
+  const renderForm = () => {
+    if (activeTab === 'warehouse') {
+      return <ProductForm onAdd={handleAddProduct} onClose={() => setIsFormOpen(false)} />;
+    }
+    if (activeTab === 'categories') {
+      return <CategoryForm products={products} onAdd={handleAddCategory} onClose={() => setIsFormOpen(false)} />;
+    }
+    if (activeTab === 'suppliers') {
+      return <SupplierForm onAdd={handleAddSupplier} onClose={() => setIsFormOpen(false)} />;
+    }
+    // Sales doesn't use a top-level modal for creation, it uses internal interaction
+    return <TransactionForm onAdd={handleAddTransaction} onClose={() => setIsFormOpen(false)} />;
   };
 
   return (
@@ -129,6 +254,12 @@ function App() {
             <LayoutDashboard size={20} /> Dashboard
           </button>
           <button 
+            onClick={() => setActiveTab('sales')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'sales' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-50'}`}
+          >
+            <ShoppingCart size={20} /> Vendas
+          </button>
+          <button 
             onClick={() => setActiveTab('transactions')}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'transactions' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-50'}`}
           >
@@ -139,6 +270,18 @@ function App() {
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'warehouse' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-50'}`}
           >
             <Package size={20} /> Armazém
+          </button>
+          <button 
+            onClick={() => setActiveTab('categories')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'categories' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-50'}`}
+          >
+            <Layers size={20} /> Categorias
+          </button>
+          <button 
+            onClick={() => setActiveTab('suppliers')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'suppliers' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-50'}`}
+          >
+            <Truck size={20} /> Fornecedores
           </button>
         </nav>
       </aside>
@@ -154,13 +297,15 @@ function App() {
             </h2>
             <p className="text-slate-500 text-sm mt-1">Bem-vindo de volta ao seu painel.</p>
           </div>
-          <button 
-            onClick={() => setIsFormOpen(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-indigo-200 transition-all flex items-center gap-2 active:scale-95"
-          >
-            {activeTab === 'warehouse' ? <PackagePlus size={18} /> : <Plus size={18} />}
-            {activeTab === 'warehouse' ? 'Novo Produto' : 'Nova Transação'}
-          </button>
+          {activeTab !== 'sales' && (
+            <button 
+              onClick={() => setIsFormOpen(true)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-indigo-200 transition-all flex items-center gap-2 active:scale-95"
+            >
+              {getAddButtonIcon()}
+              {getAddButtonLabel()}
+            </button>
+          )}
         </div>
 
         {/* Dashboard Content */}
@@ -265,7 +410,22 @@ function App() {
 
         {/* Warehouse View */}
         {activeTab === 'warehouse' && (
-          <Warehouse products={products} />
+          <Warehouse products={products} onDelete={handleDeleteProduct} />
+        )}
+
+        {/* Sales View */}
+        {activeTab === 'sales' && (
+          <Sales products={products} onSell={handleSale} />
+        )}
+
+        {/* Categories View */}
+        {activeTab === 'categories' && (
+          <Categories categories={categories} products={products} onDelete={handleDeleteCategory} />
+        )}
+
+        {/* Suppliers View */}
+        {activeTab === 'suppliers' && (
+          <Suppliers suppliers={suppliers} onDelete={handleDeleteSupplier} />
         )}
 
       </main>
@@ -273,32 +433,25 @@ function App() {
       {/* Mobile Nav Bottom */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 flex justify-around z-30 pb-safe">
         <button onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center gap-1 text-xs ${activeTab === 'dashboard' ? 'text-indigo-600' : 'text-slate-400'}`}>
-          <LayoutDashboard size={24} />
-          Início
+          <LayoutDashboard size={20} />
         </button>
-        <button onClick={() => setActiveTab('warehouse')} className={`flex flex-col items-center gap-1 text-xs ${activeTab === 'warehouse' ? 'text-indigo-600' : 'text-slate-400'}`}>
-          <Package size={24} />
-          Armazém
+        <button onClick={() => setActiveTab('sales')} className={`flex flex-col items-center gap-1 text-xs ${activeTab === 'sales' ? 'text-indigo-600' : 'text-slate-400'}`}>
+          <ShoppingCart size={20} />
         </button>
         <button onClick={() => setIsFormOpen(true)} className="flex flex-col items-center gap-1 text-xs text-indigo-600 -mt-8">
-          <div className="bg-indigo-600 text-white rounded-full p-4 shadow-lg shadow-indigo-200">
-            {activeTab === 'warehouse' ? <PackagePlus size={24} /> : <Plus size={24} />}
+          <div className="bg-indigo-600 text-white rounded-full p-3 shadow-lg shadow-indigo-200">
+             {activeTab === 'categories' ? <Layers size={20} /> : (activeTab === 'warehouse' ? <PackagePlus size={20} /> : (activeTab === 'suppliers' ? <Truck size={20} /> : <Plus size={20} />))}
           </div>
-          Add
         </button>
-        <button onClick={() => setActiveTab('transactions')} className={`flex flex-col items-center gap-1 text-xs ${activeTab === 'transactions' ? 'text-indigo-600' : 'text-slate-400'}`}>
-          <List size={24} />
-          Transações
+        <button onClick={() => setActiveTab('warehouse')} className={`flex flex-col items-center gap-1 text-xs ${activeTab === 'warehouse' ? 'text-indigo-600' : 'text-slate-400'}`}>
+          <Package size={20} />
+        </button>
+        <button onClick={() => setActiveTab('suppliers')} className={`flex flex-col items-center gap-1 text-xs ${activeTab === 'suppliers' ? 'text-indigo-600' : 'text-slate-400'}`}>
+          <Truck size={20} />
         </button>
       </div>
 
-      {isFormOpen && (
-        activeTab === 'warehouse' ? (
-          <ProductForm onAdd={handleAddProduct} onClose={() => setIsFormOpen(false)} />
-        ) : (
-          <TransactionForm onAdd={handleAddTransaction} onClose={() => setIsFormOpen(false)} />
-        )
-      )}
+      {isFormOpen && renderForm()}
     </div>
   );
 }

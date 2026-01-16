@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PackagePlus } from 'lucide-react';
+import { PackagePlus, Upload, X } from 'lucide-react';
 import { Product } from '../types';
 
 interface ProductFormProps {
@@ -18,10 +18,26 @@ export const ProductForm: React.FC<ProductFormProps> = ({ onAdd, onClose }) => {
     tax: '0',
     duty: '0'
   });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -37,6 +53,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ onAdd, onClose }) => {
       discount: parseFloat(formData.discount) || 0,
       tax: parseFloat(formData.tax) || 0,
       duty: parseFloat(formData.duty) || 0,
+      image: imagePreview || undefined,
     });
     onClose();
   };
@@ -52,6 +69,30 @@ export const ProductForm: React.FC<ProductFormProps> = ({ onAdd, onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Image Upload Section */}
+          <div className="flex justify-center mb-6">
+            <div className="relative group">
+              {imagePreview ? (
+                <div className="relative w-32 h-32 rounded-xl overflow-hidden border-2 border-slate-200">
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600 transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition-all">
+                  <Upload className="w-8 h-8 text-slate-400 mb-2 group-hover:text-indigo-500" />
+                  <span className="text-xs text-slate-500 font-medium">Add Foto</span>
+                  <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                </label>
+              )}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-slate-700 mb-1">Nome do Produto</label>
