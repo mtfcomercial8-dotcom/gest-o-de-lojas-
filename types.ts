@@ -8,6 +8,8 @@ export interface Transaction {
   type: TransactionType;
   category: string;
   date: string;
+  productName?: string; // Nome do produto vendido (opcional)
+  quantity?: number;    // Quantidade vendida (opcional)
 }
 
 export interface Category {

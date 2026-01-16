@@ -1,17 +1,30 @@
 import React from 'react';
-import { Package, TrendingUp, Trash2, ImageOff } from 'lucide-react';
+import { Package, TrendingUp, Trash2, ImageOff, Plus } from 'lucide-react';
 import { Product } from '../types';
 
 interface WarehouseProps {
   products: Product[];
   onDelete: (id: string) => void;
+  onUpdateStock: (id: string, quantity: number) => void;
 }
 
-export const Warehouse: React.FC<WarehouseProps> = ({ products, onDelete }) => {
+export const Warehouse: React.FC<WarehouseProps> = ({ products, onDelete, onUpdateStock }) => {
   const formatKz = (val: number) => new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA' }).format(val);
 
   const totalStockValue = products.reduce((acc, p) => acc + (p.purchasePrice * p.quantity), 0);
   const totalPotentialRevenue = products.reduce((acc, p) => acc + (p.sellingPrice * p.quantity), 0);
+
+  const handleAddStockClick = (id: string, currentName: string) => {
+    const qtyStr = window.prompt(`Adicionar estoque para: ${currentName}\nDigite a quantidade a ser adicionada:`);
+    if (qtyStr) {
+      const qty = parseInt(qtyStr);
+      if (!isNaN(qty) && qty > 0) {
+        onUpdateStock(id, qty);
+      } else {
+        alert("Por favor insira um número válido maior que zero.");
+      }
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -98,14 +111,22 @@ export const Warehouse: React.FC<WarehouseProps> = ({ products, onDelete }) => {
                       {formatKz(p.sellingPrice * p.quantity)}
                     </td>
                     <td className="p-4 text-center">
-                      <button 
-                        onClick={() => onDelete(p.id)}
-                        className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-100 rounded-lg transition-colors mx-auto"
-                        title="Excluir produto"
-                      >
-                        <Trash2 size={16} />
-                        <span>Apagar</span>
-                      </button>
+                      <div className="flex items-center justify-center gap-2">
+                        <button 
+                          onClick={() => handleAddStockClick(p.id, p.name)}
+                          className="flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 rounded-lg transition-colors"
+                          title="Adicionar Estoque"
+                        >
+                          <Plus size={16} />
+                        </button>
+                        <button 
+                          onClick={() => onDelete(p.id)}
+                          className="flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-100 rounded-lg transition-colors"
+                          title="Excluir produto"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
