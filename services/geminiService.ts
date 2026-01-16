@@ -1,61 +1,61 @@
-import { GoogleGenAI } from "@google/genai";
 import { Transaction } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
+// Função local que simula uma análise financeira baseada em regras matemáticas simples
 export const generateFinancialInsights = async (transactions: Transaction[]): Promise<string> => {
-  try {
-    // Summarize data to send to AI to save tokens and improve focus
-    const summary = transactions.reduce((acc, curr) => {
-      const type = curr.type;
-      if (!acc[type]) acc[type] = 0;
-      acc[type] += curr.amount;
-      
-      if (!acc.categories[curr.category]) acc.categories[curr.category] = 0;
-      acc.categories[curr.category] += curr.amount;
-      
-      return acc;
-    }, { income: 0, expense: 0, categories: {} as Record<string, number> });
+  // Simula um pequeno tempo de processamento para UX
+  await new Promise(resolve => setTimeout(resolve, 800));
 
-    // Include recent transactions (last 10) for context
-    const recentTransactions = transactions
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 10)
-      .map(t => `${t.date}: ${t.title} (${t.type}) - Kz ${t.amount}`);
+  const income = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+  const expense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+  const balance = income - expense;
+  const savingsRate = income > 0 ? (balance / income) * 100 : 0;
 
-    const prompt = `
-      Atue como um consultor financeiro especialista. Analise os seguintes dados financeiros de um usuário pessoal em Angola:
-      
-      Resumo:
-      - Total Receitas: Kz ${summary.income.toFixed(2)}
-      - Total Despesas: Kz ${summary.expense.toFixed(2)}
-      - Saldo: Kz ${(summary.income - summary.expense).toFixed(2)}
-      
-      Gastos por Categoria:
-      ${JSON.stringify(summary.categories, null, 2)}
-      
-      Últimas Transações:
-      ${recentTransactions.join('\n')}
+  // Encontrar a categoria com maior gasto
+  const expensesByCategory: Record<string, number> = {};
+  transactions.filter(t => t.type === 'expense').forEach(t => {
+    expensesByCategory[t.category] = (expensesByCategory[t.category] || 0) + t.amount;
+  });
 
-      Por favor, forneça:
-      1. Uma breve análise da saúde financeira atual.
-      2. Três dicas práticas e acionáveis para economizar ou investir melhor, baseadas especificamente nestes gastos.
-      3. Identifique se há algum padrão de gasto preocupante.
+  const sortedCategories = Object.entries(expensesByCategory).sort((a, b) => b[1] - a[1]);
+  const topCategory = sortedCategories.length > 0 ? sortedCategories[0][0] : 'Nenhuma';
+  const topCategoryAmount = sortedCategories.length > 0 ? sortedCategories[0][1] : 0;
 
-      Mantenha o tom profissional, encorajador e direto. Use formatação Markdown (negrito, listas). Considere o contexto econômico se relevante, mas foque nos hábitos.
-    `;
+  // Lógica de Geração de Texto
+  let healthStatus = "";
+  let healthColor = "";
+  let advice = "";
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
-      config: {
-        thinkingConfig: { thinkingBudget: 0 } // Disable thinking for faster response on simple analysis
-      }
-    });
-
-    return response.text || "Não foi possível gerar insights no momento.";
-  } catch (error) {
-    console.error("Erro ao chamar Gemini:", error);
-    throw new Error("Falha ao analisar dados financeiros.");
+  if (savingsRate >= 20) {
+    healthStatus = "Saudável";
+    advice = "Excelente trabalho! Você está poupando mais de 20% da sua renda. Considere investir esse excedente em fundos de renda fixa ou ações para multiplicar seu patrimônio.";
+  } else if (savingsRate > 0) {
+    healthStatus = "Equilibrada";
+    advice = "Você está no azul, mas sua margem de manobra é pequena. Tente rever gastos supérfluos para aumentar sua reserva de segurança.";
+  } else {
+    healthStatus = "Crítica";
+    advice = "Atenção! Suas despesas superaram suas receitas. É urgente cortar gastos não essenciais e evitar novas dívidas.";
   }
+
+  // Formatar valores para Kz
+  const formatKz = (val: number) => new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA' }).format(val);
+
+  return `### Relatório Financeiro Inteligente
+
+**Status Atual: ${healthStatus}**
+
+${advice}
+
+**Resumo de Métricas:**
+* **Receita Total:** ${formatKz(income)}
+* **Despesa Total:** ${formatKz(expense)}
+* **Taxa de Poupança:** ${savingsRate.toFixed(1)}%
+
+**Análise de Gastos:**
+Sua maior categoria de despesa é **${topCategory}**, consumindo um total de **${formatKz(topCategoryAmount)}**.
+
+**Recomendações Automáticas:**
+1. Defina um teto máximo para gastos com **${topCategory}** no próximo mês.
+2. Se não possuir reserva de emergência, priorize guardar pelo menos 5% da renda.
+3. Revise suas assinaturas e gastos recorrentes para encontrar desperdícios.
+`;
 };

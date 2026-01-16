@@ -1,5 +1,5 @@
 {
-  "name": "Copy of FinDash AI",
-  "description": "Uma dashboard financeira interativa e moderna que utiliza a IA do Gemini para analisar gastos, categorizar transações e oferecer conselhos financeiros personalizados.",
+  "name": "FinDash",
+  "description": "Uma dashboard financeira interativa e moderna para analisar gastos e categorizar transações.",
   "requestFramePermissions": []
 }

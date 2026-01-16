@@ -1,3 +1,4 @@
+
 export type TransactionType = 'income' | 'expense';
 
 export interface Transaction {
@@ -7,6 +8,18 @@ export interface Transaction {
   type: TransactionType;
   category: string;
   date: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  unit: string;
+  quantity: number;
+  purchasePrice: number;
+  sellingPrice: number;
+  discount: number; // Porcentagem ou valor fixo
+  tax: number; // Taxa (%)
+  duty: number; // Imposto (%)
 }
 
 export interface ChartDataPoint {
